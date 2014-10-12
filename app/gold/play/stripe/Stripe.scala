@@ -15,20 +15,16 @@ import gold.play.stripe.Charge._
 
 object Stripe {
   
-  case class StripeError(errorType: String, message: String, code: Option[String], param: Option[String])
+  case class StripeError(errorType: String, message: String)
   
   implicit val errorReads: Reads[StripeError] = (
       (__ \ "type").read[String] and
-      (__ \ "message").read[String] and
-      (__ \ "code").read[Option[String]] and
-      (__ \ "param").read[Option[String]]
+      (__ \ "message").read[String]
   )(StripeError)
   
   implicit val errorWrites: Writes[StripeError] = (
       (__ \ "type").write[String] and
-      (__ \ "message").write[String] and
-      (__ \ "code").write[Option[String]] and
-      (__ \ "param").write[Option[String]]
+      (__ \ "message").write[String]
   )(unlift(StripeError.unapply))
   
   val connectUrl = Play.current.configuration.getString("stripe.connectUrl")
@@ -66,7 +62,7 @@ object Stripe {
     // parse json into StripeToken
     response.status match {
       case status if(status == 200) => parseJson[T](response.json)
-      case _ => parseJson[StripeError](response.json).right.flatMap(Left(_))
+      case _ => parseJson[StripeError](response.json \ "error").right.flatMap(Left(_))
     }
   }
   
@@ -75,7 +71,7 @@ object Stripe {
    */
   private def parseJson[T](json: JsValue)(implicit reader: Reads[T]): Either[StripeError,T] = {
     Json.fromJson[T](json).map(Right(_)).recoverTotal{ err =>
-      Left(StripeError("parse_error",JsError.toFlatJson(err).toString,None,None))
+      Left(StripeError("parse_error",JsError.toFlatJson(err).toString))
     }
   }
   

@@ -54,7 +54,7 @@ case class Charge (
   refunded: Boolean, 
   card: Card, 
   captured: Boolean, 
-  refunds: Option[Seq[Refund]], 
+  //refunds: Option[Seq[Refund]],
   balance_transaction: String, 
   failure_message: Option[String], 
   failure_code: Option[String], 
@@ -72,7 +72,7 @@ object Charge{
   implicit val cardReads: Reads[Card] = (
         (__ \ "id").read[String] and
         (__ \ "last4").read[String] and
-        (__ \ "type").read[String] and
+        (__ \ "brand").read[String] and
         (__ \ "exp_month").read[Int] and
         (__ \ "exp_year").read[Int] and
         (__ \ "fingerprint").read[String] and
@@ -93,7 +93,7 @@ object Charge{
   implicit val cardWrites: Writes[Card] = (
         (__ \ "id").write[String] and
         (__ \ "last4").write[String] and
-        (__ \ "type").write[String] and
+        (__ \ "brand").write[String] and
         (__ \ "exp_month").write[Int] and
         (__ \ "exp_year").write[Int] and
         (__ \ "fingerprint").write[String] and
